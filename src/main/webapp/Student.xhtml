@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Student Management</title>
+</h:head>
+
+<h:body>
+    <div class="card crud-demo">
+        <h:form id="studentForm" prependId="false">
+
+            <p:growl id="messages" showDetail="true" />
+
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="New Student" icon="pi pi-plus" action="#{studentBean.init}"
+                                     update=":dialogs:manage-student-content" oncomplete="PF('manageStudentDialog').show()"
+                                     styleClass="ui-button-success" style="margin-right: 1rem">
+                        <p:resetInput target=":dialogs:manage-student-content" />
+                    </p:commandButton>
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="studentTable" widgetVar="dtStudents" var="s" value="#{studentBean.studentList}" 
+                         paginator="true" rows="7" paginatorPosition="bottom" rowKey="#{s.studentID}" >
+
+                <f:facet name="header">
+                    <div class="products-table-header">
+                        <span style="font-weight: bold">STUDENTS</span>
+                        <span class="filter-container ui-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <p:inputText id="globalFilter" onkeyup="PF('dtStudents').filter()" placeholder="Search" />
+                        </span>
+                    </div>
+                </f:facet>
+
+                <p:column headerText="Student Name" sortBy="#{s.studentName}" filterBy="#{s.studentName}">
+                    <h:outputText value="#{s.studentName}" />
+                </p:column>
+
+                <p:column headerText="Class" sortBy="#{s.classEntity.className}" filterBy="#{s.classEntity.className}">
+                    <h:outputText value="#{s.classEntity.className}" />
+                </p:column>
+
+                <p:column headerText="Actions" exportable="false">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogs:manage-student-content"
+                                     oncomplete="PF('manageStudentDialog').show()"
+                                     styleClass="edit-button rounded-button ui-button-success" process="@this">
+                        <f:setPropertyActionListener value="#{s}" target="#{studentBean.selectedStudent}" />
+                        <p:resetInput target=":dialogs:manage-student-content" />
+                    </p:commandButton>
+
+                    <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                     process="@this"
+                                     oncomplete="PF('deleteStudentDialog').show()">
+                        <f:setPropertyActionListener value="#{s}" target="#{studentBean.selectedStudent}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+
+        </h:form>
+
+        <h:form id="dialogs" prependId="false">
+            <p:dialog header="Student Details" showEffect="fade" modal="true" widgetVar="manageStudentDialog" responsive="true">
+                <p:outputPanel id="manage-student-content" class="ui-fluid">
+                    <p:outputPanel rendered="#{not empty studentBean.selectedStudent}">
+                        <div class="field">
+                            <p:outputLabel for="studentName" value="Student Name:" />
+                            <p:inputText id="studentName" value="#{studentBean.selectedStudent.studentName}" required="true" />
+                        </div>
+
+                        <div class="field">
+                            <p:outputLabel for="studentClass" value="Class:" />
+                            <p:selectOneMenu id="studentClass" value="#{studentBean.selectedStudent.classEntity}" converter="entityConverter">
+                                <f:selectItems value="#{studentBean.classList}" var="c" itemValue="#{c}" itemLabel="#{c.className}" />
+                            </p:selectOneMenu>
+                        </div>
+                    </p:outputPanel>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Save" icon="pi pi-check" actionListener="#{studentBean.save}" 
+                                     update="studentTable messages" oncomplete="PF('manageStudentDialog').hide()" />
+                    <p:commandButton value="Cancel" icon="pi pi-times" onclick="PF('manageStudentDialog').hide()" 
+                                     class="ui-button-secondary" type="button" />
+                </f:facet>
+            </p:dialog>
+
+            <p:confirmDialog widgetVar="deleteStudentDialog" showEffect="fade" width="300" 
+                             message="Delete this student?" header="Confirm" severity="warn">
+                <p:commandButton value="Yes" icon="pi pi-check" actionListener="#{studentBean.delete}" 
+                                 process="@this" update="studentTable messages" oncomplete="PF('deleteStudentDialog').hide()" />
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times" 
+                                 onclick="PF('deleteStudentDialog').hide()" />
+            </p:confirmDialog>
+        </h:form>
+
+    </div>
+</h:body>
+</html>

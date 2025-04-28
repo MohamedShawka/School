@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Class Management</title>
+    <style>
+        body {
+            background: url("#{resource['images/photo.jpg']}") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;   
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0px 8px 20px rgba(0,0,0,0.25);
+        }
+
+        .products-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .field {
+            margin-bottom: 1rem;
+        }
+    </style>
+</h:head>
+
+<h:body>
+    <div class="main-container">
+
+        <h:form id="form" prependId="false">
+            <p:growl id="messages" showDetail="true" />
+
+            <p:toolbar>
+                <p:toolbarGroup>
+                    <p:commandButton value="New Class" icon="pi pi-plus" action="#{classBean.init}"
+                                     update=":dialogs:manage-class-content" oncomplete="PF('manageClassDialog').show()"
+                                     styleClass="ui-button-success" style="margin-right: 1rem">
+                        <p:resetInput target=":dialogs:manage-class-content" />
+                    </p:commandButton>
+
+                    <p:commandButton value="View Students" icon="pi pi-users"
+                                     action="#{classBean.openStudent}"
+                                     styleClass="ui-button-success"
+                                     style="float: right"
+                                     update="form:messages form:dt-classes"
+                                     process="@this" />
+                </p:toolbarGroup>
+            </p:toolbar>
+
+            <p:dataTable id="dt-classes" widgetVar="dtClasses" var="classEntity" value="#{classBean.classList}"
+                         reflow="true" rowKey="#{classEntity.classID}" 
+                         paginator="true" rows="10" paginatorPosition="bottom">
+
+                <f:facet name="header">
+                    <div class="products-table-header">
+                        <span style="font-weight: bold">CLASSES</span>
+                        <span class="filter-container ui-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <p:inputText id="globalFilter" onkeyup="PF('dtClasses').filter()" placeholder="Search" />
+                        </span>
+                    </div>
+                </f:facet>
+
+                <p:column headerText="Class ID" sortBy="#{classEntity.classID}">
+                    <h:outputText value="#{classEntity.classID}" />
+                </p:column>
+
+                <p:column headerText="Class Name" sortBy="#{classEntity.className}" filterBy="#{classEntity.className}">
+                    <h:outputText value="#{classEntity.className}" />
+                </p:column>
+
+                <p:column headerText="Actions" exportable="false">
+                    <p:commandButton icon="pi pi-pencil" update=":dialogs:manage-class-content"
+                                     oncomplete="PF('manageClassDialog').show()"
+                                     styleClass="edit-button rounded-button ui-button-success" process="@this">
+                        <f:setPropertyActionListener value="#{classEntity}" target="#{classBean.selectedClass}" />
+                        <p:resetInput target=":dialogs:manage-class-content" />
+                    </p:commandButton>
+
+                    <p:commandButton class="ui-button-warning rounded-button" icon="pi pi-trash"
+                                     process="@this"
+                                     oncomplete="PF('deleteClassDialog').show()">
+                        <f:setPropertyActionListener value="#{classEntity}" target="#{classBean.selectedClass}" />
+                    </p:commandButton>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+
+        <h:form id="dialogs" prependId="false">
+            <p:dialog header="Class Details" showEffect="fade" modal="true" widgetVar="manageClassDialog" responsive="true">
+                <p:outputPanel id="manage-class-content" class="ui-fluid">
+                    <p:outputPanel rendered="#{not empty classBean.selectedClass}">
+                        <div class="field">
+                            <p:outputLabel for="className" value="Class Name:" />
+                            <p:inputText id="className" value="#{classBean.selectedClass.className}" required="true" />
+                        </div>
+                    </p:outputPanel>
+                </p:outputPanel>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Save" icon="pi pi-check"
+                                     actionListener="#{classBean.save}"
+                                     update="manage-class-content dt-classes messages"
+                                     oncomplete="PF('manageClassDialog').hide()" />
+                    <p:commandButton value="Cancel" icon="pi pi-times"
+                                     onclick="PF('manageClassDialog').hide()" class="ui-button-secondary" type="button" />
+                </f:facet>
+            </p:dialog>
+
+            <p:confirmDialog widgetVar="deleteClassDialog" showEffect="fade" width="300"
+                             message="Delete this class?" header="Confirm" severity="warn">
+                <p:commandButton value="Yes" icon="pi pi-check"
+                                 actionListener="#{classBean.delete}"
+                                 process="@this"
+                                 update="dt-classes messages"
+                                 oncomplete="PF('deleteClassDialog').hide()" />
+                <p:commandButton value="No" type="button" styleClass="ui-button-secondary" icon="pi pi-times"
+                                 onclick="PF('deleteClassDialog').hide()" />
+            </p:confirmDialog>
+        </h:form>
+
+    </div>
+</h:body>
+</html>
