@@ -35,25 +35,70 @@ public class StudentBean implements Serializable {
     }
 
     public void save() {
-        try {
-            if (selectedStudent != null) {
-                if (selectedStudent.getStudentName() != null && !selectedStudent.getStudentName().isEmpty()) {
-                    studentService.save(selectedStudent);
-                    studentList = studentService.findAll();
-                    selectedStudent = new Student();
-                    FacesContext.getCurrentInstance().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Student added successfully!"));
+    try {
+        if (selectedStudent != null) {
+            if (selectedStudent.getStudentName() != null && !selectedStudent.getStudentName().isEmpty()) {
 
-                } else {
+                boolean nameExists = studentList.stream()
+                    .anyMatch(s -> s.getStudentName().equalsIgnoreCase(selectedStudent.getStudentName()));
+
+                if (nameExists) {
                     FacesContext.getCurrentInstance().addMessage(null,
-                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Please enter a student name!"));
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Student name already exists!"));
+                    return;   
                 }
+
+                studentService.save(selectedStudent);
+                studentList = studentService.findAll(); 
+                selectedStudent = new Student();  
+
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Student added successfully!"));
+
+            } else {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Please enter a student name!"));
             }
-        } catch (Exception e) {
-            FacesContext.getCurrentInstance().addMessage(null,
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to add student!"));
         }
+    } catch (Exception e) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to add student!"));
+        e.printStackTrace();
     }
+}
+    public void update() {
+    try {
+        if (selectedStudent != null) {
+            if (selectedStudent.getStudentName() != null && !selectedStudent.getStudentName().trim().isEmpty()) {
+
+                boolean nameExists = studentList.stream()
+                    .anyMatch(s -> s.getStudentName().equalsIgnoreCase(selectedStudent.getStudentName())
+                        && !s.getStudentID().equals(selectedStudent.getStudentID()));
+
+                if (nameExists) {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Student name already exists!"));
+                    return;
+                }
+
+                studentService.update(selectedStudent);  
+                studentList = studentService.findAll();   
+                selectedStudent = new Student();  
+
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Student updated successfully!"));
+            } else {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Please enter a student name!"));
+            }
+        }
+    } catch (Exception e) {
+        FacesContext.getCurrentInstance().addMessage(null,
+                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to update student!"));
+        e.printStackTrace();
+    }
+}
+
 
     public void delete() {
         try {
@@ -84,5 +129,7 @@ public class StudentBean implements Serializable {
     public void setSelectedStudent(Student selectedStudent) {
         this.selectedStudent = selectedStudent;
     }
+    
+
 
 }

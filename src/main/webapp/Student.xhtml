@@ -51,7 +51,8 @@
                 <p:column headerText="Actions" exportable="false">
                     <p:commandButton icon="pi pi-pencil" update=":dialogs:manage-student-content"
                                      oncomplete="PF('manageStudentDialog').show()"
-                                     styleClass="edit-button rounded-button ui-button-success" process="@this">
+                                     styleClass="edit-button rounded-button ui-button-success" process="@this"
+                                     action="#{studentBean.update()}">
                         <f:setPropertyActionListener value="#{s}" target="#{studentBean.selectedStudent}" />
                         <p:resetInput target=":dialogs:manage-student-content" />
                     </p:commandButton>

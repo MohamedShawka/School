@@ -27,14 +27,24 @@ public class ClassBean implements Serializable {
         this.classList = classService.findAll();
         this.selectedClass = new ClassEntity();
     }
+
     public void save() {
         if (selectedClass != null) {
+            boolean nameExists = classList.stream()
+                    .anyMatch(c -> c.getClassName().equalsIgnoreCase(selectedClass.getClassName())
+                    && (selectedClass.getClassID() == null || !c.getClassID().equals(selectedClass.getClassID())));
+            if (nameExists) {
+                FacesContext.getCurrentInstance().addMessage(null,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Class name already exists!"));
+                return;
+            }
             classService.save(selectedClass);
             classList = classService.findAll();
             selectedClass = new ClassEntity();
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Class saved successfully!"));
         }
+
     }
 
     public void delete() {
@@ -49,6 +59,39 @@ public class ClassBean implements Serializable {
         } catch (Exception e) {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to delete class"));
+            e.printStackTrace();
+        }
+    }
+
+    public void update() {
+        try {
+            if (selectedClass != null) {
+                if (selectedClass.getClassName() != null && !selectedClass.getClassName().trim().isEmpty()) {
+
+                    boolean nameExists = classList.stream()
+                            .anyMatch(c -> c.getClassName().equalsIgnoreCase(selectedClass.getClassName())
+                            && !c.getClassID().equals(selectedClass.getClassID()));
+
+                    if (nameExists) {
+                        FacesContext.getCurrentInstance().addMessage(null,
+                                new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Class name already exists!"));
+                        return;
+                    }
+
+                    classService.update(selectedClass);
+                    classList = classService.findAll();
+                    selectedClass = new ClassEntity();
+
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Class updated successfully!"));
+                } else {
+                    FacesContext.getCurrentInstance().addMessage(null,
+                            new FacesMessage(FacesMessage.SEVERITY_WARN, "Warning", "Please enter a class name!"));
+                }
+            }
+        } catch (Exception e) {
+            FacesContext.getCurrentInstance().addMessage(null,
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Failed to update class!"));
             e.printStackTrace();
         }
     }
@@ -73,5 +116,4 @@ public class ClassBean implements Serializable {
         this.selectedClass = selectedClass;
     }
 
-    
 }

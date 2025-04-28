@@ -32,13 +32,20 @@ public class ClassService {
         }
         em.remove(Ce);
     }
+
     public ClassEntity findByName(String className) {
-    try {
-        return em.createQuery("SELECT c FROM ClassEntity c WHERE c.className = :className", ClassEntity.class)
-                            .setParameter("className", className)
-                            .getSingleResult();
-    } catch (NoResultException e) {
-        return null;       
+        try {
+            return em.createQuery("SELECT c FROM ClassEntity c WHERE c.className = :className", ClassEntity.class)
+                    .setParameter("className", className)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
-}
+
+    public void update(ClassEntity entity) {
+        if (entity != null && entity.getClassID() != null)
+        em.merge(entity);
+    }
+
 }

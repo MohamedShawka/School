@@ -1,5 +1,6 @@
 package com.mycompany.Services;
 
+import com.mycompany.Entities.ClassEntity;
 import com.mycompany.Entities.Student;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -28,6 +29,8 @@ public class StudentService {
         em.remove(em.merge(s));
     }
 
+    public void update(Student s) {
+        em.merge(s);
+    }
+
 }
-
-
